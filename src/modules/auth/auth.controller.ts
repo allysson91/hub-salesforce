@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiResponse } from '../../common/interfaces/api-response.interface';
+import { SkipResponseWrap } from '../../common/decorators/skip-response-wrap.decorator';
 import { Public } from './decorators/public.decorator';
 import { TokenRequestDto } from './dto/token-request.dto';
 import {
@@ -12,17 +12,12 @@ export class AuthController {
   constructor(private readonly oauthTokenService: OauthTokenService) {}
 
   @Public()
+  @SkipResponseWrap()
   @Post('token')
-  createToken(
-    @Body() body: TokenRequestDto,
-  ): ApiResponse<AccessTokenResponse> {
-    return {
-      success: true,
-      message: 'Token gerado com sucesso.',
-      data: this.oauthTokenService.issueClientCredentialsToken(
-        body.client_id,
-        body.client_secret,
-      ),
-    };
+  createToken(@Body() body: TokenRequestDto): AccessTokenResponse {
+    return this.oauthTokenService.issueClientCredentialsToken(
+      body.client_id,
+      body.client_secret,
+    );
   }
 }

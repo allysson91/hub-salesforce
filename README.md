@@ -127,13 +127,9 @@ Resposta:
 
 ```json
 {
-  "success": true,
-  "message": "Token gerado com sucesso.",
-  "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "token_type": "Bearer",
-    "expires_in": 3600
-  }
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600
 }
 ```
 
