@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseInterceptor());
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 
 void bootstrap();

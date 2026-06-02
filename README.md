@@ -41,6 +41,9 @@ PORT=3000
 
 VIACEP_BASE_URL=https://viacep.com.br/ws
 
+DATABASE_URL=
+DB_SSL=false
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
@@ -59,6 +62,15 @@ HUB_OAUTH_CLIENT_SECRET=change-this-secret
 HUB_JWT_SECRET=change-this-jwt-secret
 HUB_ACCESS_TOKEN_EXPIRES_IN=3600
 ```
+
+Para usar banco em nuvem, como Neon, preencha `DATABASE_URL` e deixe `DB_SSL=true`:
+
+```env
+DATABASE_URL=postgresql://usuario:senha@host/database?sslmode=require&uselibpqcompat=true
+DB_SSL=true
+```
+
+Quando `DATABASE_URL` estiver definida, ela tem prioridade sobre `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` e `DB_DATABASE`.
 
 ## Migrations
 
