@@ -7,12 +7,14 @@ import databaseConfig from './database.config';
 function buildTypeOrmOptions(configService: ConfigService): DataSourceOptions {
   const databaseUrl = configService.get<string>('database.url');
   const ssl = configService.get<boolean>('database.ssl') ?? false;
+  const sslRejectUnauthorized =
+    configService.get<boolean>('database.sslRejectUnauthorized') ?? true;
   const commonOptions = {
     type: 'postgres' as const,
     synchronize: false,
     migrationsRun: false,
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
-    ssl: ssl ? { rejectUnauthorized: false } : false,
+    ssl: ssl ? { rejectUnauthorized: sslRejectUnauthorized } : false,
   };
 
   if (databaseUrl) {
@@ -68,7 +70,7 @@ const dataSourceOptions: DataSourceOptions = {
       }),
   ssl:
     process.env.DB_SSL === 'true' || process.env.DATABASE_URL?.includes('sslmode=require')
-      ? { rejectUnauthorized: false }
+      ? { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' }
       : false,
   synchronize: false,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],

@@ -1,14 +1,22 @@
-import { createHmac, timingSafeEqual } from 'crypto';
+import { createHmac, randomUUID, timingSafeEqual } from 'crypto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
 
 interface TokenPayload {
+  iss: string;
+  aud: string;
   sub: string;
   clientId: string;
   grantType: string;
+  jti: string;
   iat: number;
   exp: number;
+}
+
+interface TokenHeader {
+  alg: string;
+  typ: string;
 }
 
 export interface AccessTokenResponse {
@@ -30,9 +38,12 @@ export class OauthTokenService {
     const expiresIn = this.getAccessTokenExpiresIn();
     const issuedAt = Math.floor(Date.now() / 1000);
     const payload: TokenPayload = {
+      iss: this.configService.getOrThrow<string>('auth.issuer'),
+      aud: this.configService.getOrThrow<string>('auth.audience'),
       sub: clientId,
       clientId,
       grantType: 'client_credentials',
+      jti: randomUUID(),
       iat: issuedAt,
       exp: issuedAt + expiresIn,
     };
@@ -51,6 +62,8 @@ export class OauthTokenService {
       throw new UnauthorizedException('Token de acesso inválido.');
     }
 
+    this.validateHeader(encodedHeader);
+
     const expectedSignature = this.createSignature(
       `${encodedHeader}.${encodedPayload}`,
     );
@@ -64,6 +77,13 @@ export class OauthTokenService {
 
     if (payload.exp <= now) {
       throw new UnauthorizedException('Token de acesso expirado.');
+    }
+
+    if (
+      payload.iss !== this.configService.getOrThrow<string>('auth.issuer') ||
+      payload.aud !== this.configService.getOrThrow<string>('auth.audience')
+    ) {
+      throw new UnauthorizedException('Token de acesso inválido.');
     }
 
     return payload;
@@ -114,9 +134,12 @@ export class OauthTokenService {
       ) as TokenPayload;
 
       if (
+        !payload.iss ||
+        !payload.aud ||
         !payload.sub ||
         !payload.clientId ||
         payload.grantType !== 'client_credentials' ||
+        !payload.jti ||
         typeof payload.iat !== 'number' ||
         typeof payload.exp !== 'number'
       ) {
@@ -131,6 +154,20 @@ export class OauthTokenService {
 
   private base64UrlEncode(value: string): string {
     return Buffer.from(value, 'utf8').toString('base64url');
+  }
+
+  private validateHeader(encodedHeader: string): void {
+    try {
+      const header = JSON.parse(
+        Buffer.from(encodedHeader, 'base64url').toString('utf8'),
+      ) as TokenHeader;
+
+      if (header.alg !== 'HS256' || header.typ !== 'JWT') {
+        throw new Error('Header inválido.');
+      }
+    } catch {
+      throw new UnauthorizedException('Token de acesso inválido.');
+    }
   }
 
   private safeCompare(value: string, expectedValue: string): boolean {

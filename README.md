@@ -41,8 +41,16 @@ PORT=3000
 
 VIACEP_BASE_URL=https://viacep.com.br/ws
 
+ALLOWED_ORIGINS=
+BODY_LIMIT=100kb
+RATE_LIMIT_TTL_MS=60000
+RATE_LIMIT_MAX=60
+AUTH_RATE_LIMIT_TTL_MS=60000
+AUTH_RATE_LIMIT_MAX=5
+
 DATABASE_URL=
 DB_SSL=false
+DB_SSL_REJECT_UNAUTHORIZED=true
 
 DB_HOST=localhost
 DB_PORT=5432
@@ -57,9 +65,11 @@ SALESFORCE_PASSWORD=
 SALESFORCE_SECURITY_TOKEN=
 SALESFORCE_LOGIN_URL=https://login.salesforce.com
 
-HUB_OAUTH_CLIENT_ID=salesforce-client
-HUB_OAUTH_CLIENT_SECRET=change-this-secret
-HUB_JWT_SECRET=change-this-jwt-secret
+HUB_OAUTH_CLIENT_ID=troque-este-client-id
+HUB_OAUTH_CLIENT_SECRET=troque-por-um-segredo-longo-e-aleatorio
+HUB_JWT_SECRET=troque-por-outro-segredo-longo-e-aleatorio
+HUB_JWT_ISSUER=hub-salesforce
+HUB_JWT_AUDIENCE=salesforce
 HUB_ACCESS_TOKEN_EXPIRES_IN=3600
 ```
 
@@ -71,6 +81,16 @@ DB_SSL=true
 ```
 
 Quando `DATABASE_URL` estiver definida, ela tem prioridade sobre `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` e `DB_DATABASE`.
+
+Por seguranca, `ALLOWED_ORIGINS` fica vazio por padrao. Isso evita CORS aberto em producao. Se houver um frontend browser autorizado, informe as origens separadas por virgula:
+
+```env
+ALLOWED_ORIGINS=https://meu-front.example.com,http://localhost:5173
+```
+
+As chamadas servidor-servidor do Salesforce via Named Credential nao dependem de CORS.
+
+O rate limit padrao e de 60 requisicoes por minuto por IP/rota. O endpoint de token usa limite mais restritivo de 5 tentativas por minuto.
 
 ## Migrations
 

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthController } from './auth.controller';
 import { OauthGuard } from './oauth.guard';
 import { OauthTokenService } from './oauth-token.service';
@@ -10,6 +11,10 @@ import { SalesforceAuthService } from './salesforce-auth.service';
   providers: [
     SalesforceAuthService,
     OauthTokenService,
+    {
+      provide: APP_GUARD,
+      useClass: RateLimitGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: OauthGuard,

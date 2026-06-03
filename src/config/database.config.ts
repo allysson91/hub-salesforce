@@ -8,4 +8,6 @@ export default registerAs('database', () => ({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   ssl: process.env.DB_SSL === 'true' || process.env.DATABASE_URL?.includes('sslmode=require'),
+  sslRejectUnauthorized:
+    process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
 }));
